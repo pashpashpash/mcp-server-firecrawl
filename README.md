@@ -1,10 +1,6 @@
 # FireCrawl MCP Server
 
-[![smithery badge](https://smithery.ai/badge/mcp-server-firecrawl)](https://smithery.ai/server/mcp-server-firecrawl)
-
 A Model Context Protocol (MCP) server implementation that integrates with FireCrawl for advanced web scraping capabilities.
-
-<a href="https://glama.ai/mcp/servers/57mideuljt"><img width="380" height="200" src="https://glama.ai/mcp/servers/57mideuljt/badge" alt="mcp-server-firecrawl MCP server" /></a>
 
 ## Features
 
@@ -13,7 +9,6 @@ A Model Context Protocol (MCP) server implementation that integrates with FireCr
 - URL discovery and crawling
 - Web search with content extraction
 - Automatic retries with exponential backoff
-- Credit usage monitoring for cloud API
 - Comprehensive logging system
 - Support for cloud and self-hosted FireCrawl instances
 - Mobile/Desktop viewport support
@@ -21,19 +16,21 @@ A Model Context Protocol (MCP) server implementation that integrates with FireCr
 
 ## Installation
 
-### Installing via Smithery
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/pashpashpash/mcp-server-firecrawl.git
+   cd mcp-server-firecrawl
+   ```
 
-To install FireCrawl for Claude Desktop automatically via [Smithery](https://smithery.ai/server/mcp-server-firecrawl):
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-```bash
-npx -y @smithery/cli install mcp-server-firecrawl --client claude
-```
-
-### Manual Installation
-
-```bash
-npm install -g mcp-server-firecrawl
-```
+3. **Build the Project**:
+   ```bash
+   npm run build
+   ```
 
 ## Configuration
 
@@ -62,39 +59,6 @@ npm install -g mcp-server-firecrawl
 - `FIRE_CRAWL_CREDIT_WARNING_THRESHOLD`: Credit usage warning threshold (default: 1000)
 - `FIRE_CRAWL_CREDIT_CRITICAL_THRESHOLD`: Credit usage critical threshold (default: 100)
 
-### Configuration Examples
-
-For cloud API usage with custom retry and credit monitoring:
-
-```bash
-# Required for cloud API
-export FIRE_CRAWL_API_KEY=your-api-key
-
-# Optional retry configuration
-export FIRE_CRAWL_RETRY_MAX_ATTEMPTS=5        # Increase max retry attempts
-export FIRE_CRAWL_RETRY_INITIAL_DELAY=2000    # Start with 2s delay
-export FIRE_CRAWL_RETRY_MAX_DELAY=30000       # Maximum 30s delay
-export FIRE_CRAWL_RETRY_BACKOFF_FACTOR=3      # More aggressive backoff
-
-# Optional credit monitoring
-export FIRE_CRAWL_CREDIT_WARNING_THRESHOLD=2000    # Warning at 2000 credits
-export FIRE_CRAWL_CREDIT_CRITICAL_THRESHOLD=500    # Critical at 500 credits
-```
-
-For self-hosted instance:
-
-```bash
-# Required for self-hosted
-export FIRE_CRAWL_API_URL=https://firecrawl.your-domain.com
-
-# Optional authentication for self-hosted
-export FIRE_CRAWL_API_KEY=your-api-key  # If your instance requires auth
-
-# Custom retry configuration
-export FIRE_CRAWL_RETRY_MAX_ATTEMPTS=10
-export FIRE_CRAWL_RETRY_INITIAL_DELAY=500     # Start with faster retries
-```
-
 ### Usage with Claude Desktop
 
 Add this to your `claude_desktop_config.json`:
@@ -103,16 +67,14 @@ Add this to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "mcp-server-firecrawl": {
-      "command": "npx",
-      "args": ["-y", "mcp-server-firecrawl"],
+      "command": "node",
+      "args": ["path/to/build/index.js"],
       "env": {
         "FIRE_CRAWL_API_KEY": "YOUR_API_KEY_HERE",
-
         "FIRE_CRAWL_RETRY_MAX_ATTEMPTS": "5",
         "FIRE_CRAWL_RETRY_INITIAL_DELAY": "2000",
         "FIRE_CRAWL_RETRY_MAX_DELAY": "30000",
         "FIRE_CRAWL_RETRY_BACKOFF_FACTOR": "3",
-
         "FIRE_CRAWL_CREDIT_WARNING_THRESHOLD": "2000",
         "FIRE_CRAWL_CREDIT_CRITICAL_THRESHOLD": "500"
       }
@@ -120,6 +82,7 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
+Note: Replace "path/to/build/index.js" with the actual path to your built index.js file.
 
 ### System Configuration
 
@@ -128,45 +91,17 @@ The server includes several configurable parameters that can be set via environm
 ```typescript
 const CONFIG = {
   retry: {
-    maxAttempts: 3, // Number of retry attempts for rate-limited requests
-    initialDelay: 1000, // Initial delay before first retry (in milliseconds)
-    maxDelay: 10000, // Maximum delay between retries (in milliseconds)
-    backoffFactor: 2, // Multiplier for exponential backoff
+    maxAttempts: 3,
+    initialDelay: 1000,
+    maxDelay: 10000,
+    backoffFactor: 2,
   },
   credit: {
-    warningThreshold: 1000, // Warn when credit usage reaches this level
-    criticalThreshold: 100, // Critical alert when credit usage reaches this level
+    warningThreshold: 1000,
+    criticalThreshold: 100,
   },
 };
 ```
-
-These configurations control:
-
-1. **Retry Behavior**
-
-   - Automatically retries failed requests due to rate limits
-   - Uses exponential backoff to avoid overwhelming the API
-   - Example: With default settings, retries will be attempted at:
-     - 1st retry: 1 second delay
-     - 2nd retry: 2 seconds delay
-     - 3rd retry: 4 seconds delay (capped at maxDelay)
-
-2. **Credit Usage Monitoring**
-   - Tracks API credit consumption for cloud API usage
-   - Provides warnings at specified thresholds
-   - Helps prevent unexpected service interruption
-   - Example: With default settings:
-     - Warning at 1000 credits remaining
-     - Critical alert at 100 credits remaining
-
-### Rate Limiting and Batch Processing
-
-The server utilizes FireCrawl's built-in rate limiting and batch processing capabilities:
-
-- Automatic rate limit handling with exponential backoff
-- Efficient parallel processing for batch operations
-- Smart request queuing and throttling
-- Automatic retries for transient errors
 
 ## Available Tools
 
@@ -208,34 +143,7 @@ Scrape multiple URLs efficiently with built-in rate limiting and parallel proces
 }
 ```
 
-Response includes operation ID for status checking:
-
-```json
-{
-  "content": [
-    {
-      "type": "text",
-      "text": "Batch operation queued with ID: batch_1. Use fire_crawl_check_batch_status to check progress."
-    }
-  ],
-  "isError": false
-}
-```
-
-### 3. Check Batch Status (`fire_crawl_check_batch_status`)
-
-Check the status of a batch operation.
-
-```json
-{
-  "name": "fire_crawl_check_batch_status",
-  "arguments": {
-    "id": "batch_1"
-  }
-}
-```
-
-### 4. Search Tool (`fire_crawl_search`)
+### 3. Search Tool (`fire_crawl_search`)
 
 Search the web and optionally extract content from search results.
 
@@ -255,7 +163,7 @@ Search the web and optionally extract content from search results.
 }
 ```
 
-### 5. Crawl Tool (`fire_crawl_crawl`)
+### 4. Crawl Tool (`fire_crawl_crawl`)
 
 Start an asynchronous crawl with advanced options.
 
@@ -272,15 +180,15 @@ Start an asynchronous crawl with advanced options.
 }
 ```
 
-### 6. Extract Tool (`fire_crawl_extract`)
+### 5. Extract Tool (`fire_crawl_extract`)
 
-Extract structured information from web pages using LLM capabilities. Supports both cloud AI and self-hosted LLM extraction.
+Extract structured information from web pages using LLM capabilities.
 
 ```json
 {
   "name": "fire_crawl_extract",
   "arguments": {
-    "urls": ["https://example.com/page1", "https://example.com/page2"],
+    "urls": ["https://example.com/page1"],
     "prompt": "Extract product information including name, price, and description",
     "systemPrompt": "You are a helpful assistant that extracts product information",
     "schema": {
@@ -291,85 +199,8 @@ Extract structured information from web pages using LLM capabilities. Supports b
         "description": { "type": "string" }
       },
       "required": ["name", "price"]
-    },
-    "allowExternalLinks": false,
-    "enableWebSearch": false,
-    "includeSubdomains": false
+    }
   }
-}
-```
-
-Example response:
-
-```json
-{
-  "content": [
-    {
-      "type": "text",
-      "text": {
-        "name": "Example Product",
-        "price": 99.99,
-        "description": "This is an example product description"
-      }
-    }
-  ],
-  "isError": false
-}
-```
-
-#### Extract Tool Options:
-
-- `urls`: Array of URLs to extract information from
-- `prompt`: Custom prompt for the LLM extraction
-- `systemPrompt`: System prompt to guide the LLM
-- `schema`: JSON schema for structured data extraction
-- `allowExternalLinks`: Allow extraction from external links
-- `enableWebSearch`: Enable web search for additional context
-- `includeSubdomains`: Include subdomains in extraction
-
-When using a self-hosted instance, the extraction will use your configured LLM. For cloud API, it uses FireCrawl's managed LLM service.
-
-## Logging System
-
-The server includes comprehensive logging:
-
-- Operation status and progress
-- Performance metrics
-- Credit usage monitoring
-- Rate limit tracking
-- Error conditions
-
-Example log messages:
-
-```
-[INFO] FireCrawl MCP Server initialized successfully
-[INFO] Starting scrape for URL: https://example.com
-[INFO] Batch operation queued with ID: batch_1
-[WARNING] Credit usage has reached warning threshold
-[ERROR] Rate limit exceeded, retrying in 2s...
-```
-
-## Error Handling
-
-The server provides robust error handling:
-
-- Automatic retries for transient errors
-- Rate limit handling with backoff
-- Detailed error messages
-- Credit usage warnings
-- Network resilience
-
-Example error response:
-
-```json
-{
-  "content": [
-    {
-      "type": "text",
-      "text": "Error: Rate limit exceeded. Retrying in 2 seconds..."
-    }
-  ],
-  "isError": true
 }
 ```
 
@@ -386,13 +217,23 @@ npm run build
 npm test
 ```
 
-### Contributing
+### Debugging
 
-1. Fork the repository
-2. Create your feature branch
-3. Run tests: `npm test`
-4. Submit a pull request
+The server includes comprehensive logging. You can use the MCP inspector for debugging:
+
+```bash
+cd path/to/mcp-server-firecrawl
+npx @modelcontextprotocol/inspector node build/index.js
+```
+
+View logs with:
+```bash
+tail -n 20 -f ~/Library/Logs/Claude/mcp*.log
+```
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License - see LICENSE file for details.
+
+---
+Note: This is a fork of the [original mcp-server-firecrawl repository](https://github.com/cawstudios/mcp-server-firecrawl).
