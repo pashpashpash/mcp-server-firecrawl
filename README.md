@@ -82,7 +82,25 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
-Note: Replace "path/to/build/index.js" with the actual path to your built index.js file.
+Note: Replace "path/to/build/index.js" with the **actual path** to your built index.js file. KEEP IN MIND, by default it will be in `./dist/src/index.js` according to `tsconfig.json`:
+
+```
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*", "jest.config.js", "jest.setup.ts"],
+  "exclude": ["node_modules", "dist", "tests"]
+}
+```
 
 ### System Configuration
 
